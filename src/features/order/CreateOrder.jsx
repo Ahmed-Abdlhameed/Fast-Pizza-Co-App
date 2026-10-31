@@ -5,6 +5,8 @@ import Button from "../../ui/Button";
 import { useSelector, useDispatch } from "react-redux";
 import { clearCart } from "../cart/cartSlice";
 import { fetchAddress } from "../user/userSlice";
+import { formatCurrency } from "../../utils/helpers";
+import store from "../../store";
 // https://uibakery.io/regex-library/phone-number
 const isValidPhone = (str) =>
   /^\+?\d{1,4}?[-.\s]?\(?\d{1,3}?\)?[-.\s]?\d{1,4}[-.\s]?\d{1,4}[-.\s]?\d{1,9}$/.test(
@@ -38,7 +40,12 @@ function CreateOrder() {
 
       <Form method="POST">
         <div className="mb-5">
-          <label className="mb-3 ml-3 block md:ml-6">First Name:</label>
+          <label className="mb-3 ml-3 block md:ml-6">
+            First Name:
+            {formErrors?.customer && (
+              <p className="error text-red-400">{formErrors.customer}</p>
+            )}
+          </label>
           <input
             type="text"
             name="customer"
@@ -70,6 +77,9 @@ function CreateOrder() {
         <div className="mb-5">
           <label className="mb-3 ml-3 block md:ml-6">
             Address:
+            {formErrors?.address && (
+              <p className="error text-red-400">{formErrors.address}</p>
+            )}
             {addressStatus === "error" && (
               <p className="error text-red-400">Error: {addressError}</p>
             )}
@@ -126,17 +136,10 @@ function CreateOrder() {
                 : ""
             }
           />
-          <Button
-            disabled={isSubmitting || addressStatus === "loading"}
-            onClick={() => {
-              setTimeout(() => {
-                dispatch(clearCart());
-              });
-            }}
-          >
+          <Button disabled={isSubmitting || addressStatus === "loading"}>
             {isSubmitting
               ? "Placing order..."
-              : `Order now from $${totalPrice}`}
+              : `Order now from ${formatCurrency(totalPrice)}`}
           </Button>
         </div>
       </Form>
@@ -160,15 +163,22 @@ export async function action({ request }) {
   };
   console.log(order);
 
-  // Handle order errors
+  // Handle order errors (the cart is left untouched if any of these fail)
   const errors = {};
+  if (!order.customer?.trim()) errors.customer = "Error: Please enter your name.";
   if (!isValidPhone(order.phone))
     errors.phone = "Error: Please enter a valid phone number.";
+  if (!order.address?.trim())
+    errors.address = "Error: Please enter your address.";
   if (Object.keys(errors).length > 0) return errors;
 
   // Create the order
   const newOrder = await createOrder(order);
   console.log(newOrder);
+
+  // The order succeeded, so only now we can safely clear the cart.
+  // (We can't use useDispatch here because this isn't a component.)
+  store.dispatch(clearCart());
 
   // Returning:
   return redirect(`/order/${newOrder.id}`);
