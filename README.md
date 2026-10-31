@@ -154,7 +154,7 @@ Because the app uses client-side routing, the server only has one real page (`in
 
 ## Contributions (Adding Your Own Features)
 
-Feel free to fork the repository and contribute by adding features or fixes. Pull requests are welcomed!
+Feel free to fork the repository and contribute by adding more features or fixes. Pull requests are welcomed!
 
 ## License & Author
 
