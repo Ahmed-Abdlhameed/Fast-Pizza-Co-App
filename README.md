@@ -2,7 +2,7 @@
 
 A pizza ordering app. Browse the menu, build a cart, place an order with an address filled in from your location, and track it by order ID.
 
-**[Live demo](https://fast-pizza-co-app.vercel.app/)**
+**[Live Demo](https://fast-pizza-co-app.vercel.app/)**
 
 ![Fast React Pizza Co. screenshot](screenshot.png)
 
